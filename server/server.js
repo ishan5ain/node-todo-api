@@ -1,10 +1,18 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 
-var {mongoose} = require('./db/mongoose');
-var {Todo} = require('./models/todo');
-var {Users} = require('./models/user');
-const {ObjectId} = require('mongodb');
+var {
+  mongoose
+} = require('./db/mongoose');
+var {
+  Todo
+} = require('./models/todo');
+var {
+  Users
+} = require('./models/user');
+const {
+  ObjectId
+} = require('mongodb');
 
 var app = express();
 const port = process.env.PORT || 3000;
@@ -48,7 +56,9 @@ app.get('/todos/:id', (req, res) => {
       return res.status(404).send();
     }
 
-    res.status(200).send({todo});
+    res.status(200).send({
+      todo
+    });
     // console.log('Todo by id', JSON.stringify(user, undefined, 2));
   }).catch((e) => {
     // console.log(e);
@@ -56,6 +66,32 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 // validate id using is valid
+
+app.delete('/todos/:id', (req, res) => {
+  //get the id
+  var id = req.params.id;
+
+  //validate the id -> not valid? return 404
+  if (!ObjectId.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Todo.findByIdAndDelete(id).then((todo) => {
+    if (!todo) {
+      return res.status(400).send();
+    }
+
+    console.log(todo);
+    res.status(200).send({
+      todo
+    });
+
+  }).catch((e) => {
+    console.log(e);
+    res.status(400).send(e);
+  });
+
+});
 
 
 app.listen(port, () => {

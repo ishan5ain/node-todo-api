@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
 var Users = mongoose.model('Users', {
-  email : {
+  email: {
     type: String,
     required: true,
     trim: true,
@@ -9,4 +9,6 @@ var Users = mongoose.model('Users', {
   }
 });
 
-module.exports = {Users};
+module.exports = {
+  Users
+};
