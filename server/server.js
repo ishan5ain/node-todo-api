@@ -123,6 +123,27 @@ app.patch('/todos/:id', (req, res) => {
 
 });
 
+//POST /users
+app.post('/users', (req, res)=> {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new Users(body);
+  console.log(body);
+
+  // Users.findByToken
+  // user.generateAuthToken
+
+  user.save().then(() => {
+    // res.send(user);
+    // console.log(user); //user object is saved without token first
+    return user.generateAuthToken(); //tokens are generated inside and the user object is saved again with tokens now,
+  }).then((token) => { //finally, newly generated token is forwarded to the next then promise
+    // console.log(user); //user object with token
+    res.header('x-auth', token).send(user); //we attached the new jwtoken in the custom header of our response to the client/user
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
