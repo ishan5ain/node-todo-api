@@ -3,7 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 var {
-mongoose
+  mongoose
 } = require('./db/mongoose');
 var {
   Todo
@@ -14,7 +14,9 @@ var {
 const {
   ObjectId
 } = require('mongodb');
-var {authenticate} = require('./middleware/authenticate');
+var {
+  authenticate
+} = require('./middleware/authenticate');
 
 var app = express();
 const port = process.env.PORT || 3000;
@@ -103,7 +105,7 @@ app.patch('/todos/:id', (req, res) => {
     return res.status(404).send();
   }
 
-  if(_.isBoolean(body.completed) && body.completed) {
+  if (_.isBoolean(body.completed) && body.completed) {
     body.completedAt = new Date().getTime();
   } else {
     body.completed = false;
@@ -115,17 +117,19 @@ app.patch('/todos/:id', (req, res) => {
   }, {
     new: true
   }).then((todo) => {
-    if(!todo) {
+    if (!todo) {
       return res.status(404).send();
     }
 
-    res.send(200).send({todo});
+    res.send(200).send({
+      todo
+    });
   });
 
 });
 
 //POST /users
-app.post('/users', (req, res)=> {
+app.post('/users', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
   var user = new Users(body);
   console.log(body);
@@ -161,6 +165,34 @@ app.get('/users/me', authenticate, (req, res) => {
   // });
 });
 
+
+// POST /users/login {email, password}
+
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+
+  Users.findByCredentials(body.email, body.password).then((user) => {
+    // res.send(user);
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+
+  }).catch((e) => {
+    res.status(400).send();
+  });
+
+  // res.send(body);
+});
+
+
+app.delete('/users/me/token', authenticate, (req, res) => {
+
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.status(400).send();
+  });
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
